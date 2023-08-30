@@ -38,10 +38,14 @@ module OpenAI
     def to_json(string)
       return unless string
 
-      JSON.parse(string)
+      begin
+        JSON.parse(string)
+      rescue JSON::ParserError
+        JSON.parse(string.gsub("}\n{", "},{").prepend("[").concat("]"))
+      end
     rescue JSON::ParserError
       # Convert a multiline string of JSON objects to a JSON array.
-      JSON.parse(string.gsub("}\n{", "},{").prepend("[").concat("]"))
+      string
     end
 
     # Given a proc, returns an outer proc that can be used to iterate over a JSON stream of chunks.
