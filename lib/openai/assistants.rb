@@ -3,7 +3,7 @@ module OpenAI
     BETA_VERSION = "v2".freeze
 
     def initialize(client:)
-      @client = client.beta(assistants: OpenAI::Assistants::BETA_VERSION)
+      @client = client
     end
 
     def list
