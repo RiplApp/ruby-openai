@@ -12,7 +12,7 @@ RSpec.describe OpenAI::Client do
       # that actually hit the API and causes them to fail.
       OpenAI.configure do |config|
         config.organization_id = nil
-        config.extra_headers = nil
+        config.extra_headers = {}
       end
     end
 
@@ -97,9 +97,9 @@ RSpec.describe OpenAI::Client do
         expect(c1).to receive(:get).with(path: "/files").once
         expect(c2).to receive(:get).with(path: "/files").once
 
-        expect(c0).to receive(:get).with(path: "/fine-tunes").once
-        expect(c1).to receive(:get).with(path: "/fine-tunes").once
-        expect(c2).to receive(:get).with(path: "/fine-tunes").once
+        expect(c0).to receive(:get).with(path: "/fine_tuning/jobs").once
+        expect(c1).to receive(:get).with(path: "/fine_tuning/jobs").once
+        expect(c2).to receive(:get).with(path: "/fine_tuning/jobs").once
 
         expect(c0).to receive(:json_post).with(path: "/images/generations", parameters: {}).once
         expect(c1).to receive(:json_post).with(path: "/images/generations", parameters: {}).once
@@ -109,6 +109,28 @@ RSpec.describe OpenAI::Client do
         expect(c1).to receive(:get).with(path: "/models").once
         expect(c2).to receive(:get).with(path: "/models").once
       end
+    end
+  end
+
+  context "when using beta APIs" do
+    let(:client) { OpenAI::Client.new.beta(assistants: "v2") }
+
+    it "sends the appropriate header value" do
+      expect(client.send(:headers)["OpenAI-Beta"]).to eq "assistants=v2"
+    end
+  end
+
+  context "with a block" do
+    let(:client) do
+      OpenAI::Client.new do |client|
+        client.response :logger, Logger.new($stdout), bodies: true
+      end
+    end
+
+    it "sets the logger" do
+      connection = Faraday.new
+      client.faraday_middleware.call(connection)
+      expect(connection.builder.handlers).to include Faraday::Response::Logger
     end
   end
 end
