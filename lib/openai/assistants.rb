@@ -1,6 +1,7 @@
 module OpenAI
   class Assistants
-    BETA_VERSION = "v2".freeze
+    BETA_VERSION_V1 = "v1".freeze
+    BETA_VERSION_V2 = "v2".freeze
 
     def initialize(client:)
       @client = client
